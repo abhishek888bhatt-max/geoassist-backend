@@ -22,7 +22,7 @@ It implements secure user authentication using **JWT (JSON Web Tokens)** and fol
 - **Backend:** Node.js, Express.js
 - **Database:** MongoDB (Mongoose)
 - **Authentication:** JWT
-- **Security:** bcryptjs
+- **Security:** bcryptjs, express-mongo-sanitize, csrf-csrf, express-validator
 - **Environment Variables:** dotenv
 
 ---
@@ -56,27 +56,41 @@ GeoAssist/
 
 ## 🔐 Authentication Flow
 
-1. User registers with email and password  
-2. Password is hashed using bcrypt  
-3. User logs in with valid credentials  
-4. Server generates a JWT token  
-5. Token is sent in request headers as:
-
-
-6. Middleware verifies the token  
-7. Access is granted to protected routes  
+1. Client requests CSRF token from `/api/csrf-token`
+2. User registers with email and password  
+3. Password is hashed using bcrypt  
+4. User logs in with valid credentials (with CSRF token)  
+5. Server generates a JWT token  
+6. Token is sent in request headers as: `Authorization: Bearer <token>`
+7. Middleware verifies the token  
+8. Access is granted to protected routes  
 
 ---
 
 ## 📡 API Endpoints
 
+### 🔹 Get CSRF Token
+**GET** `/api/csrf-token`
+
+**Response:**
+```json
+{
+  "token": "<csrf-token>"
+}
+```
+
 ### 🔹 Register User
-**POST** `/api/users/register`
+**POST** `/api/auth/register`
+
+**Headers:**
+```
+x-csrf-token: <csrf-token>
+```
 
 **Request Body:**
 ```json
 {
-  "name": "John Doe",
-  "email": "john@example.com",
-  "password": "123456"
+  "name": "<user-name>",
+  "email": "<user-email>",
+  "password": "<secure-password>"
 }
